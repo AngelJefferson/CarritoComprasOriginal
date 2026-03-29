@@ -1,0 +1,67 @@
+﻿@{Layout = null;}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cambiar Contrase&ntilde;a - Mi Tienda</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/all.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+</head>
+<body class="body-acceso">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-6 col-xl-5">
+                <div class="card card-change shadow-2-strong">
+                    <div class="card-header-change">
+                        <i class="fas fa-key"></i>
+                        <h3 class="fw-bold text-dark">Cambiar Contrase&ntilde;a</h3>
+                        <p class="text-muted small">Debe actualizar su contrase&ntilde;a para continuar</p>
+                    </div>
+                    <div class="card-body p-4 p-md-5 pt-0">
+                        <form action="@Url.Action("CambiarClave", "Acceso")" method="post">
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="claveActual" name="claveActual" placeholder="Contrase&ntilde;a Actual" required />
+                                <label for="claveActual"><i class="fas fa-lock me-2"></i>Contrase&ntilde;a Actual</label>
+                            </div>
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="nuevaClave" name="nuevaClave" placeholder="Nueva Contrase&ntilde;a" required minlength="6" />
+                                <label for="nuevaClave"><i class="fas fa-key me-2"></i>Nueva Contrase&ntilde;a</label>
+                            </div>
+                            <div class="form-floating mb-4">
+                                <input type="password" class="form-control" id="confirmarClave" name="confirmarClave" placeholder="Confirmar Nueva Contrase&ntilde;a" required />
+                                <label for="confirmarClave"><i class="fas fa-key me-2"></i>Confirmar Nueva Contrase&ntilde;a</label>
+                            </div>
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <div>@ViewBag.Error</div>
+                                </div>
+                            }
+                            <button class="btn btn-primary btn-change w-100 shadow-sm" type="submit">
+                                <i class="fas fa-save me-2"></i>Guardar Nueva Contrase&ntilde;a
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center mt-4 footer-text">
+                    <small>Copyright &copy; Angel Sanchez 2026</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            var nueva = document.getElementById('nuevaClave').value;
+            var confirmar = document.getElementById('confirmarClave').value;
+            if (nueva !== confirmar) {
+                e.preventDefault();
+                alert('Las contrase&ntilde;as no coinciden');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,345 @@
+@{
+    ViewBag.Title = "Checkout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .credit-card-visual {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        color: #fff;
+        position: relative;
+        overflow: hidden;
+        max-width: 360px;
+    }
+
+    .credit-card-visual::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 60%);
+    }
+
+    .card-chip {
+        width: 45px;
+        height: 32px;
+        background: linear-gradient(135deg, #ffd700, #daa520);
+        border-radius: 6px;
+        margin-bottom: 1rem;
+    }
+
+    .card-number {
+        font-size: 1.2rem;
+        letter-spacing: 3px;
+        font-family: monospace;
+        margin-bottom: 1rem;
+    }
+
+    .card-details {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.8rem;
+    }
+
+    .card-label {
+        text-transform: uppercase;
+        font-size: 0.65rem;
+        opacity: 0.7;
+        margin-bottom: 2px;
+    }
+
+    .card-brand {
+        position: absolute;
+        top: 1rem;
+        right: 1.5rem;
+        font-size: 1.5rem;
+        font-weight: bold;
+        font-style: italic;
+    }
+
+    .card-selected-check {
+        display: inline-flex;
+        align-items: center;
+        color: #198754;
+        font-weight: 600;
+        margin-top: 0.5rem;
+    }
+
+    .checkout-summary-table td,
+    .checkout-summary-table th {
+        vertical-align: middle;
+    }
+</style>
+
+<h3 class="mb-4"><i class="fas fa-cash-register me-2"></i>Checkout</h3>
+
+<div class="row">
+    <!-- Order Summary -->
+    <div class="col-md-7 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white fw-bold">
+                <i class="fas fa-receipt me-1"></i>Resumen del Pedido
+            </div>
+            <div class="card-body">
+                <div id="loadingCheckout" class="text-center py-3">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+                <table class="table checkout-summary-table" id="tablaResumen" style="display:none;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th class="text-center">Precio</th>
+                            <th class="text-center">Cant.</th>
+                            <th class="text-end">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resumenBody"></tbody>
+                    <tfoot>
+                        <tr class="table-dark">
+                            <th colspan="3" class="text-end">Total:</th>
+                            <th class="text-end fs-5" id="resumenTotal">$0.00</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="card shadow-sm mt-3">
+            <div class="card-header bg-dark text-white fw-bold">
+                <i class="fas fa-credit-card me-1"></i>Metodo de Pago
+            </div>
+            <div class="card-body">
+                <div class="credit-card-visual mx-auto mb-3">
+                    <div class="card-brand">VISA</div>
+                    <div class="card-chip"></div>
+                    <div class="card-number">**** &nbsp; **** &nbsp; **** &nbsp; 4242</div>
+                    <div class="card-details">
+                        <div>
+                            <div class="card-label">Titular</div>
+                            <div>CLIENTE DEMO</div>
+                        </div>
+                        <div>
+                            <div class="card-label">Vence</div>
+                            <div>12/28</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="card-selected-check">
+                        <i class="fas fa-check-circle fa-lg me-2"></i>Tarjeta seleccionada
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shipping Form -->
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white fw-bold">
+                <i class="fas fa-truck me-1"></i>Datos de Envio
+            </div>
+            <div class="card-body">
+                <form id="formEnvio">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre de Contacto</label>
+                        <input type="text" class="form-control" id="txtContacto" placeholder="Nombre completo" required autocomplete="off" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Telefono</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                            <input type="text" class="form-control" id="txtTelefono" placeholder="Ej: 999888777" required autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Departamento</label>
+                        <select class="form-select" id="cboDepartamento">
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Provincia</label>
+                        <select class="form-select" id="cboProvincia" disabled>
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Distrito</label>
+                        <select class="form-select" id="cboDistrito" disabled>
+                            <option value="">Seleccionar...</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Direccion</label>
+                        <textarea class="form-control" id="txtDireccion" rows="3" placeholder="Direccion completa de envio" required style="resize:none;"></textarea>
+                    </div>
+                </form>
+
+                <button class="btn btn-success w-100 fw-bold btn-lg" id="btnConfirmarCompra" disabled>
+                    <i class="fas fa-lock me-1"></i>Confirmar Compra - <span id="btnTotalText">$0.00</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        var totalCompra = 0;
+
+        // Load order summary
+        function cargarResumen() {
+            $.ajax({
+                url: '@Url.Action("ListarCarrito", "Tienda")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $("#loadingCheckout").hide();
+                    var items = data.data;
+                    totalCompra = 0;
+
+                    if (items.length === 0) {
+                        window.location.href = '@Url.Action("Index", "Tienda")';
+                        return;
+                    }
+
+                    var html = "";
+                    $.each(items, function (i, item) {
+                        totalCompra += item.SubTotal;
+                        html += '<tr>';
+                        html += '  <td>' + item.Nombre + '</td>';
+                        html += '  <td class="text-center">$' + item.Precio.toFixed(2) + '</td>';
+                        html += '  <td class="text-center">' + item.Cantidad + '</td>';
+                        html += '  <td class="text-end fw-bold">$' + item.SubTotal.toFixed(2) + '</td>';
+                        html += '</tr>';
+                    });
+
+                    $("#resumenBody").html(html);
+                    $("#resumenTotal").text("$" + totalCompra.toFixed(2));
+                    $("#btnTotalText").text("$" + totalCompra.toFixed(2));
+                    $("#tablaResumen").show();
+                    validarFormulario();
+                }
+            });
+        }
+
+        // Load departments
+        function cargarDepartamentos() {
+            $.ajax({
+                url: '@Url.Action("ObtenerDepartamentos", "Tienda")',
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    $.each(data.data, function (i, dep) {
+                        $("<option>").attr("value", dep.IdDepartamento).text(dep.Descripcion).appendTo("#cboDepartamento");
+                    });
+                }
+            });
+        }
+
+        // Cascading: department -> province
+        $("#cboDepartamento").on("change", function () {
+            var idDep = $(this).val();
+            $("#cboProvincia").html('<option value="">Seleccionar...</option>').prop("disabled", true);
+            $("#cboDistrito").html('<option value="">Seleccionar...</option>').prop("disabled", true);
+
+            if (!idDep) { validarFormulario(); return; }
+
+            $.ajax({
+                url: '@Url.Action("ObtenerProvincias", "Tienda")',
+                type: 'GET',
+                data: { idDepartamento: idDep },
+                dataType: 'json',
+                success: function (data) {
+                    $.each(data.data, function (i, prov) {
+                        $("<option>").attr("value", prov.IdProvincia).text(prov.Descripcion).appendTo("#cboProvincia");
+                    });
+                    $("#cboProvincia").prop("disabled", false);
+                    validarFormulario();
+                }
+            });
+        });
+
+        // Cascading: province -> district
+        $("#cboProvincia").on("change", function () {
+            var idProv = $(this).val();
+            $("#cboDistrito").html('<option value="">Seleccionar...</option>').prop("disabled", true);
+
+            if (!idProv) { validarFormulario(); return; }
+
+            $.ajax({
+                url: '@Url.Action("ObtenerDistritos", "Tienda")',
+                type: 'GET',
+                data: { idProvincia: idProv },
+                dataType: 'json',
+                success: function (data) {
+                    $.each(data.data, function (i, dist) {
+                        $("<option>").attr("value", dist.IdDistrito).text(dist.Descripcion).appendTo("#cboDistrito");
+                    });
+                    $("#cboDistrito").prop("disabled", false);
+                    validarFormulario();
+                }
+            });
+        });
+
+        $("#cboDistrito").on("change", function () { validarFormulario(); });
+
+        // Validate form to enable button
+        function validarFormulario() {
+            var contacto = $("#txtContacto").val().trim();
+            var telefono = $("#txtTelefono").val().trim();
+            var distrito = $("#cboDistrito").val();
+            var direccion = $("#txtDireccion").val().trim();
+
+            if (contacto && telefono && distrito && direccion && totalCompra > 0) {
+                $("#btnConfirmarCompra").prop("disabled", false);
+            } else {
+                $("#btnConfirmarCompra").prop("disabled", true);
+            }
+        }
+
+        $("#txtContacto, #txtTelefono, #txtDireccion").on("input", function () { validarFormulario(); });
+
+        // Process sale
+        $("#btnConfirmarCompra").on("click", function () {
+            var btn = $(this);
+            btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-1"></i>Procesando...');
+
+            $.ajax({
+                url: '@Url.Action("ProcesarVenta", "Tienda")',
+                type: 'POST',
+                data: {
+                    contacto: $("#txtContacto").val().trim(),
+                    telefono: $("#txtTelefono").val().trim(),
+                    idDistrito: $("#cboDistrito").val(),
+                    direccion: $("#txtDireccion").val().trim()
+                },
+                dataType: 'json',
+                success: function (data) {
+                    if (data.resultado) {
+                        window.location.href = '@Url.Action("Confirmacion", "Tienda")?id=' + data.idTransaccion;
+                    } else {
+                        alert(data.mensaje || "Error al procesar la venta");
+                        btn.prop("disabled", false).html('<i class="fas fa-lock me-1"></i>Confirmar Compra - <span id="btnTotalText">$' + totalCompra.toFixed(2) + '</span>');
+                    }
+                },
+                error: function () {
+                    alert("Error de conexion");
+                    btn.prop("disabled", false).html('<i class="fas fa-lock me-1"></i>Confirmar Compra - <span id="btnTotalText">$' + totalCompra.toFixed(2) + '</span>');
+                }
+            });
+        });
+
+        // Init
+        $(document).ready(function () {
+            cargarResumen();
+            cargarDepartamentos();
+        });
+    </script>
+}

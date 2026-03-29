@@ -1,0 +1,388 @@
+================================================================================
+EXPLICACION DEL PROYECTO CARRITO DE COMPRAS
+================================================================================
+
+Este documento explica como funciona el proyecto de forma simple.
+
+================================================================================
+1. ESTRUCTURA DEL PROYECTO (ARQUITECTURA)
+================================================================================
+
+El proyecto tiene 5 capas (capas), como si fueran pisos de un edificio:
+
+1. CapaEntidad      -> Define las "cajas" donde guardamos datos
+2. CapaDatos        -> Se conecta a la base de datos (SQL Server)
+3. CapaNegocio      -> Reglas y logica del programa
+4. CapaPresentacionAdmin -> Pagina web para el administrador
+5. CapaPresentacionTienda -> Pagina web para los clientes
+
+
+================================================================================
+2. CAPAENTIDAD - Las cajas para guardar datos
+================================================================================
+
+Son clases simples que representan las tablas de la base de datos.
+
+----- USUARIO (CapaEntidad/Usuario.cs) -----
+    public class Usuario
+    {
+        public int IdUsuario { get; set; }      // Numero unico del usuario
+        public string Nombre { get; set; }       // Nombre
+        public string Apellido { get; set; }     // Apellido
+        public string Correo { get; set; }      // Correo electronico
+        public string Clave { get; set; }        // Contrasena encriptada
+        public bool Reestablecer { get; set; }  // Si necesita cambiar contrasena
+        public bool Activo { get; set; }        // Si esta activo o no
+    }
+
+----- CLIENTE (CapaEntidad/Cliente.cs) -----
+    public class Cliente
+    {
+        public int IdCliente { get; set; }
+        public string Nombres { get; set; }
+        public string Apellidos { get; set; }
+        public string Correo { get; set; }
+        public string Clave { get; set; }
+        public bool Reestablecer { get; set; }
+        public string Provincia { get; set; }    // Nueva: Provincia del cliente
+    }
+
+----- PRODUCTO (CapaEntidad/Producto.cs) -----
+    public class Producto
+    {
+        public int IdProducto { get; set; }
+        public string Nombre { get; set; }
+        public string Descripcion { get; set; }
+        public Marca oMarca { get; set; }        // Relación con Marca
+        public Categoria oCategoria { get; set; } // Relación con Categoria
+        public decimal Precio { get; set; }
+        public int Stock { get; set; }
+        public string RutaImagen { get; set; }   // Donde esta la foto
+        public string NombreImagen { get; set; } // Nombre del archivo de la foto
+        public string Base64 { get; set; }       // Foto en formato texto
+        public string Extension { get; set; }   // Tipo de imagen (.jpg, .png)
+    }
+
+----- CATEGORIA (CapaEntidad/Categoria.cs) -----
+    public class Categoria
+    {
+        public int IdCategoria { get; set; }
+        public string Descripcion { get; set; }
+        public bool Activo { get; set; }
+    }
+
+----- MARCA (CapaEntidad/Marca.cs) -----
+    public class Marca
+    {
+        public int IdMarca { get; set; }
+        public string Descripcion { get; set; }
+        public bool Activo { get; set; }
+    }
+
+----- CARRITO (CapaEntidad/Carrito.cs) -----
+    public class Carrito
+    {
+        public int IdCarrito { get; set; }
+        public int IdCliente { get; set; }
+        public int IdProducto { get; set; }
+        public int Cantidad { get; set; }
+        public Producto oProducto { get; set; } // Producto en el carrito
+    }
+
+----- VENTA (CapaEntidad/Venta.cs) -----
+    public class Venta
+    {
+        public int IdVenta { get; set; }
+        public int IdCliente { get; set; }
+        public int TotalProducto { get; set; }
+        public decimal MontoTotal { get; set; }
+        public string Contacto { get; set; }
+        public string Telefono { get; set; }
+        public string IdDistrito { get; set; }
+        public string Direccion { get; set; }
+        public string IdTransaccion { get; set; }
+    }
+
+
+================================================================================
+3. CAPADATOS - Conexion con la base de datos
+================================================================================
+
+Aqui se hacen todas las consultas a SQL Server.
+
+----- Conexion (CapaDatos/Conexion.cs) -----
+    public class Conexion
+    {
+        public static string cn = "Data Source=...;Initial Catalog=DBCARRITOTEST...";
+    }
+
+Esta clase tiene la cadena de conexion que se usa en todo el proyecto.
+
+----- CD_Usuario (CapaDatos/CD_Usuario.cs) -----
+Metodos disponibles:
+
+1. Listar() -> Lista todos los usuarios
+2. Registrar(Usuario obj, out string Mensaje) -> Crea un nuevo usuario
+3. Editar(Usuario obj, out string Mensaje) -> Modifica un usuario
+4. Eliminar(int id, out string Mensaje) -> Elimina un usuario
+
+----- CD_Cliente (CapaDatos/CD_Cliente.cs) -----
+Metodos disponibles:
+
+1. Registrar(Cliente obj, out string Mensaje) -> Crea un nuevo cliente
+2. Login(string correo, string clave, out string Mensaje) -> Inicia sesion
+3. Listar() -> Lista todos los clientes (para el admin)
+
+----- CD_Producto (CapaDatos/CD_Producto.cs) -----
+Metodos disponibles:
+
+1. Listar() -> Lista todos los productos con marca y categoria
+2. Registrar(Producto obj, out string Mensaje) -> Crea producto
+3. Editar(Producto obj, out string Mensaje) -> Edita producto
+4. Eliminar(int id, out string Mensaje) -> Elimina producto
+
+----- CD_Categoria (CapaDatos/CD_Categoria.cs) -----
+Metodos disponibles:
+
+1. Listar() -> Lista todas las categorias activas
+
+----- CD_Marca (CapaDatos/CD_Marca.cs) -----
+Metodos disponibles:
+
+1. Listar() -> Lista todas las marcas activas
+
+----- CD_Carrito (CapaDatos/CD_Carrito.cs) -----
+Metodos disponibles:
+
+1. Listar(int idCliente) -> Lista el carrito de un cliente
+2. Agregar(int idCliente, int idProducto, int cantidad, out string Mensaje)
+3. Eliminar(int idCarrito, out string Mensaje)
+4. Cantidad(int idCliente) -> Cuantos productos hay en el carrito
+
+----- CD_Venta (CapaDatos/CD_Venta.cs) -----
+Metodos disponibles:
+
+1. Registrar(Venta obj, out string Mensaje) -> Registra la venta
+
+
+================================================================================
+4. CAPANEGOCIO - Reglas y logica
+================================================================================
+
+Aqui se aplican las reglas del negocio y se llama a la capa de datos.
+
+----- CN_Usuario (CapaNegocio/CN_Usuario.cs) -----
+1. Listar() -> Llama a CD_Usuario.Listar()
+2. Registrar(Usuario obj, out string Mensaje) -> Valida y llama a CD_Usuario.Registrar()
+3. Editar(Usuario obj, out string Mensaje) -> Valida y llama a CD_Usuario.Editar()
+4. Eliminar(int id, out string Mensaje) -> Llama a CD_Usuario.Eliminar()
+5. CambiarClave(int id, string nuevaClave, out string Mensaje) -> Cambia contrasena
+6. ReestablecerClave(string correo, out string Mensaje) -> Genera nueva contrasena
+
+----- CN_Cliente (CapaNegocio/CN_Cliente.cs) -----
+1. Registrar(Cliente obj, out string Mensaje) -> Valida y registra cliente
+2. Login(string correo, string clave, out string Mensaje) -> Inicia sesion
+3. Listar() -> Lista clientes
+
+----- CN_Producto (CapaNegocio/CN_Producto.cs) -----
+1. Listar() -> Lista productos
+2. Registrar(Producto obj, out string Mensaje) -> Valida y registra
+3. Editar(Producto obj, out string Mensaje) -> Valida y edita
+4. Eliminar(int id, out string Mensaje) -> Elimina producto
+
+----- CN_Carrito (CapaNegocio/CN_Carrito.cs) -----
+1. Listar(int idCliente) -> Lista carrito
+2. Agregar(int idCliente, int idProducto, int cantidad, out string Mensaje)
+3. Modificar(int idCarrito, int cantidad, out string Mensaje)
+4. Eliminar(int idCarrito, out string Mensaje)
+5. Contar(int idCliente) -> Cuenta items del carrito
+
+----- CN_Venta (CapaNegocio/CN_Venta.cs) -----
+1. RegistrarVenta(Venta obj, out string Mensaje) -> Procesa la venta
+
+----- CN_Recursos (CapaNegocio/CN_Recursos.cs) -----
+1. ConvertirSha256(string texto) -> Encripta contrasenas
+2. ConvertirBase64(string ruta, out bool conversion) -> Convierte imagen a texto
+3. GenerarClave() -> Genera una contrasena aleatoria de 8 caracteres
+
+
+================================================================================
+5. CAPAPRESENTACIONADMIN - Panel de administracion
+================================================================================
+
+Es una aplicacion web MVC (Model-View-Controller).
+
+----- Controladores (Controllers) -----
+
+1. HomeController
+   - Index() -> Muestra el Dashboard
+   - Usuarios() -> Muestra la lista de usuarios
+   - ListarUsuarios() [GET] -> Devuelve lista de usuarios en JSON
+   - GuardarUsuario() [POST] -> Guarda o edita usuario
+   - EliminarUsuario() [POST] -> Elimina usuario
+   - VistaDashBoard() [GET] -> Estadisticas para el dashboard
+   - ExportarVenta() [POST] -> Exporta ventas a Excel
+
+2. AccesoController
+   - Index() -> Pagina de login
+   - Index(correo, clave) [POST] -> Procesa el login
+   - CambiarClave() -> Pagina para cambiar contrasena
+   - RecuperarClave() [POST] -> Envia nueva contrasena por correo
+
+3. MantenedorController
+   - Categoria() -> Pagina de categorias
+   - Marca() -> Pagina de marcas
+   - Producto() -> Pagina de productos
+   - ListarCategorias() [GET] -> Lista categorias
+   - ListarMarcas() [GET] -> Lista marcas
+   - ListarProductos() [GET] -> Lista productos
+   - GuardarCategoria() [POST] -> Guarda categoria
+   - GuardarMarca() [POST] -> Guarda marca
+   - GuardarProducto() [POST] -> Guarda producto (con imagen)
+   - EliminarCategoria() [POST] -> Elimina categoria
+   - EliminarMarca() [POST] -> Elimina marca
+   - EliminarProducto() [POST] -> Elimina producto
+
+----- Vistas (Views) -----
+
+- Views/Shared/_Layout.cshtml -> Plantilla general con menu
+- Views/Home/Index.cshtml -> Dashboard
+- Views/Home/Usuarios.cshtml -> Gestion de usuarios
+- Views/Acceso/Index.cshtml -> Login del admin
+- Views/Acceso/CambiarClave.cshtml -> Cambiar contrasena
+- Views/Mantenedor/Categoria.cshtml -> Gestion de categorias
+- Views/Mantenedor/Marca.cshtml -> Gestion de marcas
+- Views/Mantenedor/Producto.cshtml -> Gestion de productos
+
+
+================================================================================
+6. CAPAPRESENTACIONTIENDA - Tienda online
+================================================================================
+
+----- Controladores (Controllers) -----
+
+1. TiendaController
+   - Index() -> Pagina principal con productos
+   - ListarCategorias() [GET] -> Lista categorias para filtrar
+   - ListarProductos() [GET] -> Lista productos en JSON (con imagenes)
+   - AgregarCarrito() [POST] -> Agrega producto al carrito
+   - ListarCarrito() [GET] -> Lista productos en el carrito
+   - ModificarCarrito() [POST] -> Cambia cantidad
+   - EliminarCarrito() [POST] -> Quita producto del carrito
+   - ContarCarrito() [GET] -> Cuantos items hay
+   - Checkout() -> Pagina de pago
+   - ProcesarVenta() [POST] -> Procesa la compra
+   - Confirmacion() -> Pagina de confirmacion
+
+2. AccesoController (de Tienda)
+   - Index() -> Login/Registro
+   - Login(correo, clave) [POST] -> Inicia sesion de cliente
+   - Registrar(Cliente obj) [POST] -> Registra nuevo cliente
+   - CerrarSesion() -> Cierra sesion
+
+3. CarritoController
+   - Index() -> Muestra el carrito (opcional)
+
+----- Vistas (Views) -----
+
+- Views/Shared/_Layout.cshtml -> Plantilla de la tienda
+- Views/Tienda/Index.cshtml -> Catalogo de productos
+- Views/Acceso/Index.cshtml -> Login y registro
+- Views/Tienda/Checkout.cshtml -> Formulario de pago
+
+
+================================================================================
+7. FLUJO DE DATOS - Ejemplo: Registrar un producto
+================================================================================
+
+1. Usuario llena el formulario en Views/Mantenedor/Producto.cshtml
+2. JavaScript envia los datos a MantenedorController.GuardarProducto()
+3. El controlador recibe el objeto Producto
+4. Llama a CN_Producto.Registrar(Producto obj, out mensaje)
+5. CN_Producto valida los datos (ej: nombre no vacio)
+6. Si es valido, llama a CD_Producto.Registrar(Producto obj, out mensaje)
+7. CD_Producto ejecuta el Stored Procedure en SQL Server
+8. SQL Server inserta el producto en la tabla PRODUCTO
+9. El resultado sube por el mismo camino hasta el navegador
+
+
+================================================================================
+8. FLUJO DE DATOS - Ejemplo: Comprar un producto
+================================================================================
+
+1. Cliente ve productos en Tienda/Index.cshtml
+2. Clic en "Agregar al carrito" -> TiendaController.AgregarCarrito()
+3. Se guarda en la tabla CARRITO de SQL Server
+4. Cliente va al Checkout y llena sus datos
+5. Clic en "Confirmar compra" -> TiendaController.ProcesarVenta()
+6. Se crea un registro en VENTA y DETALLE_VENTA
+7. Se limpia el carrito
+8. Se muestra la pagina de confirmacion
+
+
+================================================================================
+9. CONTRASENAS - Como funcionan
+================================================================================
+
+Las contrasenas NO se guardan en texto plano.
+
+1. Cuando se registra un usuario:
+   - CN_Recursos.ConvertirSha256(contrasena) -> Encripta
+   - Ejemplo: "admin123" -> "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae"
+
+2. Cuando un usuario inicia sesion:
+   - Se encripta la contrasena ingresada
+   - Se compara con la guardada en la base de datos
+   - Si son iguales, el login es exitoso
+
+
+================================================================================
+10. IMAGENES - Como funcionan
+================================================================================
+
+1. Cuando subes una imagen en el admin:
+   - La imagen se guarda en la carpeta FOTO_CARRITO
+   - Se guarda el nombre del archivo en la base de datos
+   - La ruta se guarda en la base de datos
+
+2. Cuando se muestra en la tienda:
+   - Se lee la imagen de la carpeta
+   - Se convierte a formato Base64 (texto)
+   - Se muestra como: data:image/jpg;base64,[texto]
+
+3. Si no hay imagen local:
+   - Se usa una imagen de internet como respaldo
+
+
+================================================================================
+11. CONEXION A BASE DE DATOS
+================================================================================
+
+Todo pasa por esta cadena de conexion en Web.config:
+
+    Data Source=(localdb)\MSSQLLocalDB;    <- Servidor SQL
+    Initial Catalog=DBCARRITOTEST;         <- Nombre de la base de datos
+    Integrated Security=True                <- Autenticacion de Windows
+
+Para cambiar de base de datos:
+1. Crear la nueva base de datos en SQL Server
+2. Ejecutar el script INSTALACION.sql
+3. Cambiar el nombre en Web.config
+
+
+================================================================================
+12. ARCHIVOS IMPORTANTES
+================================================================================
+
+Web.config (Admin) -> Cadena de conexion a SQL Server
+Web.config (Tienda) -> Cadena de conexion a SQL Server
+INSTALACION.sql -> Script para crear toda la base de datos
+Conexion.cs -> Clase que tiene la cadena de conexion
+Site.css -> Estilos CSS globales
+
+
+================================================================================
+FIN DEL DOCUMENTO
+================================================================================
+
+Si tienes dudas sobre alguna parte especifica, pregunta!

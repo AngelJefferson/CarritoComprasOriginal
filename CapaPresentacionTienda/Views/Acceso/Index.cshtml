@@ -1,0 +1,150 @@
+@{
+    ViewBag.Title = "Acceso";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white text-center">
+                <h4 class="mb-0"><i class="fas fa-user-lock me-2"></i>Acceso</h4>
+            </div>
+            <div class="card-body">
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-1"></i>@ViewBag.Error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs mb-3" id="accesoTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#loginPanel" type="button" role="tab">
+                            <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesion
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#registerPanel" type="button" role="tab">
+                            <i class="fas fa-user-plus me-1"></i>Registrarse
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="accesoTabContent">
+
+                    <!-- Login Tab -->
+                    <div class="tab-pane fade show active" id="loginPanel" role="tabpanel">
+                        <form method="post" action="@Url.Action("Login", "Acceso")">
+                            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                            <div class="mb-3">
+                                <label class="form-label">Correo Electronico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" name="correo" placeholder="correo@ejemplo.com" required autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contrasena</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" name="clave" placeholder="Tu contrasena" required />
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">
+                                <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesion
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Register Tab -->
+                    <div class="tab-pane fade" id="registerPanel" role="tabpanel">
+                        <form method="post" action="@Url.Action("Registrar", "Acceso")" id="formRegistro">
+                            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Nombres</label>
+                                    <input type="text" class="form-control" name="Nombres" placeholder="Tus nombres" required autocomplete="off" />
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Apellidos</label>
+                                    <input type="text" class="form-control" name="Apellidos" placeholder="Tus apellidos" required autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Correo Electronico</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" class="form-control" name="Correo" placeholder="correo@ejemplo.com" required autocomplete="off" />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Provincia</label>
+                                <select class="form-select" name="Provincia" id="provinciaSelect" required>
+                                    <option value="">Seleccione su provincia</option>
+                                    <option value="Santiago">Santiago</option>
+                                    <option value="Santo Domingo">Santo Domingo</option>
+                                    <option value="Punta Cana">Punta Cana</option>
+                                    <option value="La Romana">La Romana</option>
+                                    <option value="Puerto Plata">Puerto Plata</option>
+                                    <option value="La Vega">La Vega</option>
+                                    <option value="San Pedro de Macoris">San Pedro de Macoris</option>
+                                    <option value="San Cristobal">San Cristobal</option>
+                                    <option value="San Juan">San Juan</option>
+                                    <option value="Barahona">Barahona</option>
+                                    <option value="Duarte">Duarte</option>
+                                    <option value="Espaillat">Espaillat</option>
+                                    <option value="Monte Cristi">Monte Cristi</option>
+                                    <option value="Samana">Samana</option>
+                                    <option value="Hato Mayor">Hato Mayor</option>
+                                    <option value="El Seibo">El Seibo</option>
+                                    <option value="Azua">Azua</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contrasena</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" name="Clave" id="regClave" placeholder="Tu contrasena" required />
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Confirmar Contrasena</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" class="form-control" id="regConfirmarClave" placeholder="Repite tu contrasena" required />
+                                </div>
+                                <div class="invalid-feedback" id="msgClaveNoCoincide">Las contrasenas no coinciden.</div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100 fw-bold">
+                                <i class="fas fa-user-plus me-1"></i>Registrarse
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $("#formRegistro").on("submit", function (e) {
+            var clave = $("#regClave").val();
+            var confirmar = $("#regConfirmarClave").val();
+            if (clave !== confirmar) {
+                e.preventDefault();
+                $("#regConfirmarClave").addClass("is-invalid");
+                $("#msgClaveNoCoincide").show();
+            }
+        });
+
+        $("#regConfirmarClave").on("input", function () {
+            $(this).removeClass("is-invalid");
+            $("#msgClaveNoCoincide").hide();
+        });
+    </script>
+}

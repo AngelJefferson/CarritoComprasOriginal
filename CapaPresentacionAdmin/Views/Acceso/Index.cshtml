@@ -1,0 +1,113 @@
+﻿@{Layout = null;}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Iniciar Sesi&oacute;n - Mi Tienda</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/all.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+</head>
+<body class="body-acceso">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-6 col-xl-5">
+                <div class="card card-login shadow-2-strong">
+                    <div class="login-header">
+                        <i class="fas fa-user-circle"></i>
+                        <h3 class="fw-bold text-dark">Bienvenido</h3>
+                        <p class="text-muted small">Ingresa tus credenciales para continuar</p>
+                    </div>
+                    <div class="card-body p-4 p-md-5 pt-0">
+                        <form action="@Url.Action("Index", "Acceso")" method="post">
+                            <div class="form-floating mb-4">
+                                <input type="email" class="form-control" id="correo" name="correo" placeholder="name@example.com" required />
+                                <label for="correo"><i class="fas fa-envelope me-2"></i>Correo Electr&oacute;nico</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input type="password" class="form-control" id="clave" name="clave" placeholder="Contrase&ntilde;a" required />
+                                <label for="clave"><i class="fas fa-lock me-2"></i>Contrase&ntilde;a</label>
+                            </div>
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <div>@ViewBag.Error</div>
+                                </div>
+                            }
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <a href="#" class="text-decoration-none small text-primary fw-medium" data-bs-toggle="modal" data-bs-target="#modalRecuperar">&iquest;Olvidaste tu contrase&ntilde;a?</a>
+                            </div>
+                            <button class="btn btn-primary btn-login w-100 shadow-sm" type="submit">
+                                Acceder <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center mt-4 footer-text">
+                    <small>Copyright &copy; Angel Sanchez 2026</small>
+                    <div class="mt-2">
+                        <a href="#" class="text-white-50 text-decoration-none small mx-2">Privacidad</a>
+                        <span class="text-white-50">&middot;</span>
+                        <a href="#" class="text-white-50 text-decoration-none small mx-2">T&eacute;rminos</a>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="javascript:location.reload()" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-redo me-2"></i>Recargar Pagina
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+    <div class="modal fade" id="modalRecuperar" tabindex="-1" aria-labelledby="modalRecuperarLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalRecuperarLabel"><i class="fas fa-key me-2"></i>Recuperar Contrase&ntilde;a</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="@Url.Action("RecuperarClave", "Acceso")" method="post">
+                    <div class="modal-body">
+                        <p class="text-muted">Ingresa tu correo electr&oacute;nico y te enviaremos una nueva contrase&ntilde;a.</p>
+                        <div class="form-floating mb-3">
+                            <input type="email" class="form-control" id="correoRecuperar" name="correo" placeholder="name@example.com" required />
+                            <label for="correoRecuperar"><i class="fas fa-envelope me-2"></i>Correo Electr&oacute;nico</label>
+                        </div>
+                        <div id="mensajeRecuperar"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="btnRecuperar">
+                            <i class="fas fa-paper-plane me-2"></i>Enviar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @if (ViewBag.RecuperarError != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var modal = new bootstrap.Modal(document.getElementById('modalRecuperar'));
+                document.getElementById('mensajeRecuperar').innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>@ViewBag.RecuperarError</div>';
+                modal.show();
+            });
+        </script>
+    }
+    @if (ViewBag.RecuperarSuccess != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var modal = new bootstrap.Modal(document.getElementById('modalRecuperar'));
+                document.getElementById('mensajeRecuperar').innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>@ViewBag.RecuperarSuccess</div>';
+                document.getElementById('correoRecuperar').value = '';
+                modal.show();
+            });
+        </script>
+    }
+</body>
+</html>
