@@ -510,6 +510,6 @@ GO
 
 PRINT '';
 PRINT '============================================';
-PRINT ' 26 STORED PROCEDURES CREADOS';
+PRINT ' 27 STORED PROCEDURES CREADOS';
 PRINT '============================================';
 GO
