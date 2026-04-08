@@ -409,6 +409,52 @@ AS BEGIN
 END
 GO
 
+-- SP Limpiar Carrito
+IF OBJECT_ID('SP_LimpiarCarrito', 'P') IS NOT NULL DROP PROCEDURE SP_LimpiarCarrito;
+GO
+CREATE PROCEDURE SP_LimpiarCarrito
+    @IdCliente int,
+    @Resultado bit OUTPUT, @Mensaje varchar(500) OUTPUT
+AS BEGIN
+    SET @Resultado = 0
+    DELETE FROM CARRITO WHERE IdCliente = @IdCliente
+    SET @Resultado = 1
+END
+GO
+
+-- SP Listar Producto
+IF OBJECT_ID('SP_ListarProducto', 'P') IS NOT NULL DROP PROCEDURE SP_ListarProducto;
+GO
+CREATE PROCEDURE SP_ListarProducto
+AS BEGIN
+    SELECT p.IdProducto, p.Nombre, p.Descripcion,
+        m.IdMarca, m.Descripcion AS DesMarca,
+        c.IdCategoria, c.Descripcion AS DesCategoria,
+        p.Precio, p.Stock, p.RutaImagen, p.NombreImagen, p.Activo
+    FROM PRODUCTO p
+    LEFT JOIN MARCA m ON m.IdMarca = p.IdMarca
+    LEFT JOIN CATEGORIA c ON c.IdCategoria = p.IdCategoria
+    ORDER BY p.IdProducto DESC
+END
+GO
+
+-- SP Listar Producto Tienda
+IF OBJECT_ID('SP_ListarProductoTienda', 'P') IS NOT NULL DROP PROCEDURE SP_ListarProductoTienda;
+GO
+CREATE PROCEDURE SP_ListarProductoTienda
+AS BEGIN
+    SELECT p.IdProducto, p.Nombre, p.Descripcion,
+        m.IdMarca, m.Descripcion AS DesMarca,
+        c.IdCategoria, c.Descripcion AS DesCategoria,
+        p.Precio, p.Stock, p.RutaImagen, p.NombreImagen, p.Activo
+    FROM PRODUCTO p
+    LEFT JOIN MARCA m ON m.IdMarca = p.IdMarca
+    LEFT JOIN CATEGORIA c ON c.IdCategoria = p.IdCategoria
+    WHERE p.Activo = 1 AND p.Stock > 0
+    ORDER BY p.FechaRegistro DESC
+END
+GO
+
 -- ================================================================
 -- STORED PROCEDURES - UBICACION
 -- ================================================================
@@ -510,6 +556,6 @@ GO
 
 PRINT '';
 PRINT '============================================';
-PRINT ' 27 STORED PROCEDURES CREADOS';
+PRINT ' 29 STORED PROCEDURES CREADOS';
 PRINT '============================================';
 GO
