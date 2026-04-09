@@ -126,10 +126,7 @@
                         <div class="btn-group">
                             <button class="btn btn-outline-success btn-sm" type="button" onclick="exportar()">
                                 <i class="fas fa-file-excel me-1"></i> Excel
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" type="submit" disabled>
-                                <i class="fas fa-file-pdf"></i> PDF
-                            </button>
+                            </button>                            
                         </div>
                     </form>
                 </div>
@@ -194,8 +191,23 @@
         var tabladata;
         var myPieChart;
 
+        // Función para formatear fecha dd/MM/yyyy
+        function formatDate(date) {
+            var day = ("0" + date.getDate()).slice(-2);
+            var month = ("0" + (date.getMonth() + 1)).slice(-2);
+            var year = date.getFullYear();
+            return day + "/" + month + "/" + year;
+        }
+
+        // Función para agregar un día a la fecha fin
+        function addDay(date) {
+            var result = new Date(date);
+            result.setDate(result.getDate() + 1);
+            return result;
+        }
+
         $(document).ready(function () {
-            // Inicializar Datepickers
+            // Inicializar Datepickers con formato correcto
             $("#txtfechainicio").datepicker({ dateFormat: 'dd/mm/yy' }).datepicker('setDate', new Date());
             $("#txtfechafin").datepicker({ dateFormat: 'dd/mm/yy' }).datepicker('setDate', new Date());
 
@@ -214,10 +226,14 @@
                 }
             });
 
-            // Configurar Datatable
+            // Construir URL con fechas formateadas
+            var fechaInicio = formatDate(new Date());
+            var fechaFin = formatDate(addDay(new Date()));
+
             var UrlDefault = '@Url.Action("ListaReporte", "Home")' +
-                "?fechainicio=" + $("#txtfechainicio").val() +
-                "&fechafin=" + $("#txtfechafin").val();
+                "?fechainicio=" + fechaInicio +
+                "&fechafin=" + fechaFin +
+                "&idtransaccion=";
 
             tabladata = $('#tabla').DataTable({
                 responsive: true,
@@ -243,18 +259,27 @@
 
         // Botón Buscar
         $("#btnbuscar").on("click", function () {
+            var fi = $("#txtfechainicio").val();
+            var ff = addDay($("#txtfechafin").val());
+            var fechaFinFormateada = formatDate(ff);
+            var transaccion = encodeURIComponent($("#txtidtransaccion").val());
+
             var nueva_url = '@Url.Action("ListaReporte", "Home")' +
-                "?fechainicio=" + $("#txtfechainicio").val() +
-                "&fechafin=" + $("#txtfechafin").val() +
-                "&idtransaccion=" + $("#txtidtransaccion").val();
+                "?fechainicio=" + fi +
+                "&fechafin=" + fechaFinFormateada +
+                "&idtransaccion=" + transaccion;
 
             tabladata.ajax.url(nueva_url).load();
         });
 
         // Función para Exportar Excel
         function exportar() {
-            $("#h_inicio").val($("#txtfechainicio").val());
-            $("#h_fin").val($("#txtfechafin").val());
+            var fi = $("#txtfechainicio").val();
+            var ff = addDay($("#txtfechafin").val());
+            var fechaFinFormateada = formatDate(ff);
+
+            $("#h_inicio").val(fi);
+            $("#h_fin").val(fechaFinFormateada);
             $("#h_idtransaccion").val($("#txtidtransaccion").val());
 
             $("#formExportar").submit();

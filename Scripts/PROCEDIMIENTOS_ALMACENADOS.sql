@@ -554,6 +554,49 @@ AS BEGIN
 END
 GO
 
+-- ================================================================
+-- STORED PROCEDURES - REPORTES
+-- ================================================================
+
+-- SP Reporte Ventas
+IF OBJECT_ID('SP_ReporteVentas', 'P') IS NOT NULL DROP PROCEDURE SP_ReporteVentas;
+GO
+CREATE PROCEDURE SP_ReporteVentas
+    @fechainicio varchar(50), @fechafin varchar(50), @idtransaccion varchar(50)
+AS BEGIN
+    DECLARE @FechaIni datetime
+    DECLARE @FechaFin datetime
+    
+    SET @FechaIni = CONVERT(datetime, @fechainicio, 103)
+    SET @FechaFin = DATEADD(day, 1, CONVERT(datetime, @fechafin, 103))
+    
+    SELECT v.FechaVenta,
+        c.Nombres + ' ' + c.Apellidos AS Cliente,
+        dv.Cantidad, dv.Total,
+        p.Nombre AS Producto,
+        p.Precio,
+        v.IdTransaccion
+    FROM VENTA v
+    INNER JOIN CLIENTE c ON c.IdCliente = v.IdCliente
+    INNER JOIN DETALLE_VENTA dv ON dv.IdVenta = v.IdVenta
+    INNER JOIN PRODUCTO p ON p.IdProducto = dv.IdProducto
+    WHERE v.FechaVenta >= @FechaIni AND v.FechaVenta < @FechaFin
+        AND (@idtransaccion = '' OR v.IdTransaccion LIKE '%' + @idtransaccion + '%')
+END
+GO
+
+-- SP Reporte Dashboard
+IF OBJECT_ID('SP_ReporteDashboard', 'P') IS NOT NULL DROP PROCEDURE SP_ReporteDashboard;
+GO
+CREATE PROCEDURE SP_ReporteDashboard
+AS BEGIN
+    SELECT 
+        (SELECT COUNT(*) FROM CLIENTE) AS TotalCliente,
+        (SELECT COUNT(*) FROM VENTA) AS TotalVenta,
+        (SELECT COUNT(*) FROM PRODUCTO) AS TotalProducto
+END
+GO
+
 PRINT '';
 PRINT '============================================';
 PRINT ' 29 STORED PROCEDURES CREADOS';
