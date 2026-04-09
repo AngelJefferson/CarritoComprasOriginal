@@ -126,7 +126,10 @@
                         <div class="btn-group">
                             <button class="btn btn-outline-success btn-sm" type="button" onclick="exportar()">
                                 <i class="fas fa-file-excel me-1"></i> Excel
-                            </button>                            
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" type="submit" disabled>
+                                <i class="fas fa-file-pdf"></i> PDF
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -191,23 +194,8 @@
         var tabladata;
         var myPieChart;
 
-        // Función para formatear fecha dd/MM/yyyy
-        function formatDate(date) {
-            var day = ("0" + date.getDate()).slice(-2);
-            var month = ("0" + (date.getMonth() + 1)).slice(-2);
-            var year = date.getFullYear();
-            return day + "/" + month + "/" + year;
-        }
-
-        // Función para agregar un día a la fecha fin
-        function addDay(date) {
-            var result = new Date(date);
-            result.setDate(result.getDate() + 1);
-            return result;
-        }
-
         $(document).ready(function () {
-            // Inicializar Datepickers con formato correcto
+            // Inicializar Datepickers
             $("#txtfechainicio").datepicker({ dateFormat: 'dd/mm/yy' }).datepicker('setDate', new Date());
             $("#txtfechafin").datepicker({ dateFormat: 'dd/mm/yy' }).datepicker('setDate', new Date());
 
@@ -226,13 +214,17 @@
                 }
             });
 
-            // Inicializar DataTable SIN cargar datos automaticamente
+            // Configurar Datatable
+            var UrlDefault = '@Url.Action("ListaReporte", "Home")' +
+                "?fechainicio=" + $("#txtfechainicio").val() +
+                "&fechafin=" + $("#txtfechafin").val();
+
             tabladata = $('#tabla').DataTable({
                 responsive: true,
                 ordering: false,
                 pageLength: 5,
                 ajax: {
-                    url: "",
+                    url: UrlDefault,
                     type: "GET",
                     datatype: "json"
                 },
@@ -245,41 +237,24 @@
                     { "data": "Total" },
                     { "data": "IdTransaccion" }
                 ],
-                language: {
-                    url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json",
-                    emptyTable: "Ingrese un rango de fechas y haga clic en Buscar"
-                }
+                language: { url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json" }
             });
         });
 
         // Botón Buscar
         $("#btnbuscar").on("click", function () {
-            var fi = $("#txtfechainicio").val();
-            var ff = addDay($("#txtfechafin").val());
-            var fechaFinFormateada = formatDate(ff);
-            var transaccion = encodeURIComponent($("#txtidtransaccion").val());
-
-            if (!fi || !ff) {
-                alert("Por favor seleccione fecha de inicio y fecha fin");
-                return;
-            }
-
             var nueva_url = '@Url.Action("ListaReporte", "Home")' +
-                "?fechainicio=" + fi +
-                "&fechafin=" + fechaFinFormateada +
-                "&idtransaccion=" + transaccion;
+                "?fechainicio=" + $("#txtfechainicio").val() +
+                "&fechafin=" + $("#txtfechafin").val() +
+                "&idtransaccion=" + $("#txtidtransaccion").val();
 
             tabladata.ajax.url(nueva_url).load();
         });
 
         // Función para Exportar Excel
         function exportar() {
-            var fi = $("#txtfechainicio").val();
-            var ff = addDay($("#txtfechafin").val());
-            var fechaFinFormateada = formatDate(ff);
-
-            $("#h_inicio").val(fi);
-            $("#h_fin").val(fechaFinFormateada);
+            $("#h_inicio").val($("#txtfechainicio").val());
+            $("#h_fin").val($("#txtfechafin").val());
             $("#h_idtransaccion").val($("#txtidtransaccion").val());
 
             $("#formExportar").submit();
