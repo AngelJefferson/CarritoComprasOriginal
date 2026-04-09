@@ -601,11 +601,8 @@ GO
 CREATE PROCEDURE SP_ReporteVentas
     @fechainicio varchar(50), @fechafin varchar(50), @idtransaccion varchar(50)
 AS BEGIN
-    DECLARE @FechaInicio datetime
-    DECLARE @FechaFinMasUno datetime
-    
-    SET @FechaInicio = CONVERT(datetime, @fechainicio, 103)
-    SET @FechaFinMasUno = DATEADD(day, 1, CONVERT(datetime, @fechafin, 103))
+    DECLARE @ini datetime = CONVERT(datetime, @fechainicio, 103)
+    DECLARE @fin datetime = DATEADD(day, 1, CONVERT(datetime, @fechafin, 103))
     
     SELECT v.FechaVenta,
         c.Nombres + ' ' + c.Apellidos AS Cliente,
@@ -617,7 +614,7 @@ AS BEGIN
     INNER JOIN CLIENTE c ON c.IdCliente = v.IdCliente
     INNER JOIN DETALLE_VENTA dv ON dv.IdVenta = v.IdVenta
     INNER JOIN PRODUCTO p ON p.IdProducto = dv.IdProducto
-    WHERE v.FechaVenta >= @FechaInicio AND v.FechaVenta < @FechaFinMasUno
+    WHERE v.FechaVenta >= @ini AND v.FechaVenta < @fin
         AND (@idtransaccion = '' OR v.IdTransaccion LIKE '%' + @idtransaccion + '%')
 END
 GO
