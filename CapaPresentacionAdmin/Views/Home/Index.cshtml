@@ -226,21 +226,13 @@
                 }
             });
 
-            // Construir URL con fechas formateadas
-            var fechaInicio = formatDate(new Date());
-            var fechaFin = formatDate(addDay(new Date()));
-
-            var UrlDefault = '@Url.Action("ListaReporte", "Home")' +
-                "?fechainicio=" + fechaInicio +
-                "&fechafin=" + fechaFin +
-                "&idtransaccion=";
-
+            // Inicializar DataTable SIN cargar datos automaticamente
             tabladata = $('#tabla').DataTable({
                 responsive: true,
                 ordering: false,
                 pageLength: 5,
                 ajax: {
-                    url: UrlDefault,
+                    url: "",
                     type: "GET",
                     datatype: "json"
                 },
@@ -253,7 +245,10 @@
                     { "data": "Total" },
                     { "data": "IdTransaccion" }
                 ],
-                language: { url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json" }
+                language: {
+                    url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json",
+                    emptyTable: "Ingrese un rango de fechas y haga clic en Buscar"
+                }
             });
         });
 
@@ -263,6 +258,11 @@
             var ff = addDay($("#txtfechafin").val());
             var fechaFinFormateada = formatDate(ff);
             var transaccion = encodeURIComponent($("#txtidtransaccion").val());
+
+            if (!fi || !ff) {
+                alert("Por favor seleccione fecha de inicio y fecha fin");
+                return;
+            }
 
             var nueva_url = '@Url.Action("ListaReporte", "Home")' +
                 "?fechainicio=" + fi +
