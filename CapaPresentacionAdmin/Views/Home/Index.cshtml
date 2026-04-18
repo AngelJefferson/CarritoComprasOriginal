@@ -151,6 +151,13 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                        <input type="text" id="txtBuscarTabla" class="form-control" placeholder="Buscar en la tabla: nombre del cliente, producto, transaccion..." />
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table id="tabla" class="table table-hover table-sm border" style="width:100%">
                         <thead>
@@ -235,6 +242,11 @@
                     { "data": "IdTransaccion" }
                 ],
                 language: { url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json" }
+            });
+
+            // Busqueda en tiempo real en la tabla
+            $('#txtBuscarTabla').on('keyup', function () {
+                tabladata.search(this.value).draw();
             });
         });
 
