@@ -126,10 +126,7 @@
                         <div class="btn-group">
                             <button class="btn btn-outline-success btn-sm" type="button" onclick="exportar()">
                                 <i class="fas fa-file-excel me-1"></i> Excel
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm" type="submit" disabled>
-                                <i class="fas fa-file-pdf"></i> PDF
-                            </button>
+                            </button>                            
                         </div>
                     </form>
                 </div>
@@ -243,12 +240,33 @@
 
         // Botón Buscar
         $("#btnbuscar").on("click", function () {
-            var nueva_url = '@Url.Action("ListaReporte", "Home")' +
-                "?fechainicio=" + $("#txtfechainicio").val() +
-                "&fechafin=" + $("#txtfechafin").val() +
-                "&idtransaccion=" + $("#txtidtransaccion").val();
+            var fechainicio = $("#txtfechainicio").val();
+            var fechafin = $("#txtfechafin").val();
+            var idtransaccion = $("#txtidtransaccion").val().trim();
+            
+            // Si solo ingresa ID de transacción, buscar solo por transacción
+            if (idtransaccion !== "") {
+                var url_transaccion = '@Url.Action("ListaReporte", "Home")' +
+                    "?fechainicio=01/01/1900" +
+                    "&fechafin=01/01/2100" +
+                    "&idtransaccion=" + encodeURIComponent(idtransaccion);
+                tabladata.ajax.url(url_transaccion).load();
+            } 
+            // Si ingresa fechas, buscar por rango de fechas
+            else if (fechainicio && fechafin) {
+                var nueva_url = '@Url.Action("ListaReporte", "Home")' +
+                    "?fechainicio=" + fechainicio +
+                    "&fechafin=" + fechafin +
+                    "&idtransaccion=";
+                tabladata.ajax.url(nueva_url).load();
+            }
+        });
 
-            tabladata.ajax.url(nueva_url).load();
+        // Buscar por Enter en campo ID Transacción
+        $("#txtidtransaccion").on("keypress", function (e) {
+            if (e.which === 13) {
+                $("#btnbuscar").click();
+            }
         });
 
         // Función para Exportar Excel
