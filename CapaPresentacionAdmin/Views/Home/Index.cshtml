@@ -141,20 +141,13 @@
                         <input class="form-control form-control-sm" type="text" id="txtfechafin" />
                     </div>
                     <div class="col-sm-4">
-                        <label class="form-label small fw-bold">Id Transacción</label>
-                        <input class="form-control form-control-sm" type="text" id="txtidtransaccion" placeholder="Opcional..." />
+                        <label class="form-label small fw-bold">Buscar (Cliente, Producto o Transacción)</label>
+                        <input class="form-control form-control-sm" type="text" id="txtbuscar" placeholder="Escribe para buscar..." />
                     </div>
                     <div class="col-sm-2">
                         <button class="btn btn-primary btn-sm w-100" id="btnbuscar" type="button">
                             <i class="fas fa-search me-1"></i> Buscar
                         </button>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
-                        <input type="text" id="txtBuscarTabla" class="form-control" placeholder="Buscar en la tabla: nombre del cliente, producto, transaccion..." />
                     </div>
                 </div>
 
@@ -244,11 +237,6 @@
                 language: { url: "https://cdn.datatables.net/plug-ins/1.11.3/i18n/es_es.json" }
             });
 
-            // Busqueda en tiempo real en la tabla
-            $('#txtBuscarTabla').on('keyup', function () {
-                tabladata.search($(this).val()).draw();
-            });
-
             // Forzar primera carga de datos
             $("#btnbuscar").click();
         });
@@ -257,15 +245,15 @@
         $("#btnbuscar").on("click", function () {
             var fechainicio = $("#txtfechainicio").val();
             var fechafin = $("#txtfechafin").val();
-            var idtransaccion = $("#txtidtransaccion").val().trim();
+            var buscar = $("#txtbuscar").val().trim();
             
-            // Si solo ingresa ID de transacción, buscar solo por transacción
-            if (idtransaccion !== "") {
-                var url_transaccion = '@Url.Action("ListaReporte", "Home")' +
+            // Si solo ingresa texto de busqueda (cliente, producto o transaccion)
+            if (buscar !== "") {
+                var url_buscar = '@Url.Action("ListaReporte", "Home")' +
                     "?fechainicio=01/01/1900" +
                     "&fechafin=01/01/2100" +
-                    "&idtransaccion=" + encodeURIComponent(idtransaccion);
-                tabladata.ajax.url(url_transaccion).load();
+                    "&idtransaccion=" + encodeURIComponent(buscar);
+                tabladata.ajax.url(url_buscar).load();
             } 
             // Si ingresa fechas, buscar por rango de fechas
             else if (fechainicio && fechafin) {
@@ -277,8 +265,20 @@
             }
         });
 
-        // Buscar por Enter en campo ID Transacción
-        $("#txtidtransaccion").on("keypress", function (e) {
+        // Busqueda en tiempo real mientras escribe
+        $("#txtbuscar").on("keyup", function (e) {
+            var buscar = $(this).val().trim();
+            if (buscar.length >= 2 || buscar.length === 0) {
+                var url_buscar = '@Url.Action("ListaReporte", "Home")' +
+                    "?fechainicio=01/01/1900" +
+                    "&fechafin=01/01/2100" +
+                    "&idtransaccion=" + encodeURIComponent(buscar);
+                tabladata.ajax.url(url_buscar).load();
+            }
+        });
+
+        // Buscar por Enter
+        $("#txtbuscar").on("keypress", function (e) {
             if (e.which === 13) {
                 $("#btnbuscar").click();
             }
@@ -286,9 +286,10 @@
 
         // Función para Exportar Excel
         function exportar() {
+            var buscar = $("#txtbuscar").val();
             $("#h_inicio").val($("#txtfechainicio").val());
             $("#h_fin").val($("#txtfechafin").val());
-            $("#h_idtransaccion").val($("#txtidtransaccion").val());
+            $("#h_idtransaccion").val(buscar);
 
             $("#formExportar").submit();
         }
